@@ -1,0 +1,50 @@
+<!-- sidebar.html -->
+<nav class="sidebar d-flex flex-column" id="sidebar">
+  <div class="text-center pt-3 pb-1">
+    <img src="{{ url_for('static', filename='images/logo_telkom.png') }}" alt="Telkom Logo"
+      class="img-fluid sidebar-logo" />
+    <div class="logo">GAUL</div>
+    <hr class="sidebar-separator" />
+  </div>
+
+  <ul class="nav flex-column flex-grow-1">
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/dashboard' %}active{% endif %}" href="/dashboard">
+        <i class="bi bi-speedometer2 me-2"></i>
+        Dashboard
+      </a>
+    </li>
+
+    {% if user_role != 'admin' %}
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/management_data' %}active{% endif %}" href="/management_data">
+        <i class="bi bi-table me-2"></i>
+         Data Management
+      </a>
+    </li>
+    {% endif %}
+
+    {% if user_role == 'admin' %}
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/management_user' %}active{% endif %}" href="/management_user">
+        <i class="bi bi-people me-2"></i>
+        User Management
+      </a>
+    </li>
+    {% endif %}
+
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/profile' %}active{% endif %}" href="/profile">
+        <i class="bi bi-person me-2"></i>
+        Profile
+      </a>
+    </li>
+  </ul>
+
+  <!-- Logout di bagian paling bawah -->
+  <div class="mt-auto p-3">
+    <a class="nav-link text-white logout-link" href="/logout">
+      <i class="bi bi-box-arrow-right me-2"></i> Logout
+    </a>
+  </div>
+</nav>

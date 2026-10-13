@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - GAUL</title>
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="static/dashboard.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    {% include 'sidebar.html' %}
+
+    <!-- Overlay -->
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Navbar -->
+      {% include 'navbar.html' %}
+
+      <!-- Toast Container -->
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+        <div id="toastBox" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div id="toastMessage" class="toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="container-fluid p-4">
+        <!-- Report Date Bar -->
+        <div class="report-date-bar mb-3 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+          <div class="input-group input-group-sm w-auto">
+            <input type="date" id="startDate" class="form-control" placeholder="Start Date" />
+            <span class="input-group-text calendar-icon"><i class="bi bi-calendar-date"></i></span>
+          </div>
+          <div class="input-group input-group-sm w-auto">
+            <input type="date" id="endDate" class="form-control" placeholder="End Date" />
+            <span class="input-group-text calendar-icon"><i class="bi bi-calendar-date"></i></span>
+          </div>
+          <button id="filterButton" class="btn btn-telkom btn-sm">Filter</button>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="metric-card">
+              <h6>TOTAL TIKET</h6>
+              <h3 id="totalTiket">{{ total_tiket }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="metric-card">
+              <h6>REDAMAN ≥ -23 dB</h6>
+              <h3 id="totalRedaman">{{ total_redaman }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="metric-card">
+              <h6>SCC NOT PASSED</h6>
+              <h3 id="totalSCC">{{ total_scc }}</h3>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="metric-card">
+              <h6>TOTAL STO</h6>
+              <h3 id="totalSTO">{{ total_sto }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="chart-card">
+              <h6>TOTAL TIKET</h6>
+              <canvas id="jumlahTiketChart"></canvas>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="chart-card">
+              <h6>REDAMAN &amp; SCC NOT PASSED</h6>
+              <canvas id="sccRedamanChart"></canvas>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="chart-card chart-pie">
+              <h6>GANGGUAN ULANG TIAP STO</h6>
+              <canvas id="stoPieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Script -->
+    <script>
+        feather.replace();
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // Variabel global chart
+        let jumlahTiketChart;
+        let sccRedamanChart;
+        let stoPieChart;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            /* Chart Jumlah Tiket */
+            const jumlahTiketCtx = document.getElementById('jumlahTiketChart').getContext('2d');
+            jumlahTiketChart = new Chart(jumlahTiketCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ jumlah_tiket_labels | safe }},
+            datasets: [{
+                label: 'Jumlah Tiket',
+                data: {{ jumlah_tiket_values | safe }},
+            backgroundColor: 'rgba(237, 28, 36, 0.8)',
+            borderColor: '#ed1c24',
+            borderWidth: 1
+          }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { bottom: 20 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#333',
+                    bodyColor: '#333',
+                    borderColor: '#ddd',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#333' } },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#eee' },
+                    ticks: {
+                        color: '#333',
+                        stepSize: 1,
+                        callback: (value) => Math.floor(value)
+                    },
+                    title: { display: true, text: 'Tiket', color: '#333' }
+                }
+            }
+        }
+      });
+
+        /* Chart SCC & Redaman */
+        const sccRedamanCtx = document.getElementById('sccRedamanChart').getContext('2d');
+        sccRedamanChart = new Chart(sccRedamanCtx, {
+            type: 'line',
+            data: {
+                labels: {{ tanggal_labels | safe }},
+            datasets: [
+            {
+                label: 'SCC Not Passed',
+                data: {{ scc_values | safe }},
+            borderColor: '#f39c12',
+            backgroundColor: 'rgba(243, 156, 18, 0.2)',
+            tension: 0.3,
+            fill: false,
+            borderWidth: 2
+            },
+            {
+                label: 'Redaman ≤ 23',
+                data: {{ redaman_values | safe }},
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+            tension: 0.3,
+            fill: false,
+            borderWidth: 2
+            }
+        ]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { bottom: 20 } },
+            plugins: {
+                legend: { position: 'top', labels: { color: '#333' } },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#333',
+                    bodyColor: '#333',
+                    borderColor: '#ddd',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#333' }, grid: { color: '#f0f0f0' } },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#333', stepSize: 1 },
+                    grid: { color: '#f0f0f0' },
+                    title: { display: true, text: 'Tiket', color: '#333' }
+                }
+            }
+        }
+      });
+
+        /* Pie Chart STO */
+        const stoPieCtx = document.getElementById('stoPieChart').getContext('2d');
+        stoPieChart = new Chart(stoPieCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ sto_labels | safe }},
+            datasets: [{
+                data: {{ sto_values | safe }},
+            backgroundColor: [
+                '#ed1c24', '#f39c12', '#2ecc71',
+                '#3498db', '#9b59b6', '#16a085', '#7f8c8d'
+            ],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#333' } },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#333',
+                    bodyColor: '#333',
+                    borderColor: '#ddd',
+                    borderWidth: 1
+                }
+            }
+        }
+      });
+
+        /* Filter Data */
+        document.getElementById('filterButton').addEventListener('click', async () => {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            try {
+                const response = await fetch('/filter-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start_date: startDate, end_date: endDate })
+                });
+
+                const result = await response.json();
+                showToast(result.message, result.status);
+
+                if (response.ok && result.status === "success") {
+                    updateDashboard(result);
+                } else {
+                    resetDashboard();
+                }
+            } catch (error) {
+                showToast("Terjadi kesalahan saat memproses data", "danger");
+                resetDashboard();
+            }
+        });
+    });
+
+        /* Update dashboard */
+        function updateDashboard(result) {
+            jumlahTiketChart.data.labels = result.labels;
+            jumlahTiketChart.data.datasets[0].data = result.jumlah_tiket;
+            jumlahTiketChart.update();
+
+            sccRedamanChart.data.labels = result.labels;
+            sccRedamanChart.data.datasets[0].data = result.scc;
+            sccRedamanChart.data.datasets[1].data = result.redaman;
+            sccRedamanChart.update();
+
+            stoPieChart.data.labels = result.sto_labels;
+            stoPieChart.data.datasets[0].data = result.sto_values;
+            stoPieChart.update();
+
+            document.getElementById('totalTiket').textContent = result.total_tiket;
+            document.getElementById('totalRedaman').textContent = result.total_redaman;
+            document.getElementById('totalSCC').textContent = result.total_scc;
+            document.getElementById('totalSTO').textContent = result.total_sto;
+        }
+
+        /* Reset dashboard */
+        function resetDashboard() {
+            jumlahTiketChart.data.labels = [];
+            jumlahTiketChart.data.datasets[0].data = [];
+            jumlahTiketChart.update();
+
+            sccRedamanChart.data.labels = [];
+            sccRedamanChart.data.datasets[0].data = [];
+            sccRedamanChart.data.datasets[1].data = [];
+            sccRedamanChart.update();
+
+            stoPieChart.data.labels = [];
+            stoPieChart.data.datasets[0].data = [];
+            stoPieChart.update();
+
+            document.getElementById('totalTiket').textContent = 0;
+            document.getElementById('totalRedaman').textContent = 0;
+            document.getElementById('totalSCC').textContent = 0;
+            document.getElementById('totalSTO').textContent = 0;
+        }
+
+        /* Toast */
+        function showToast(message, type) {
+            const toastBox = document.getElementById('toastBox');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = message;
+            let bgClass = "bg-primary";
+            if (type === "success") bgClass = "bg-success";
+            if (type === "danger") bgClass = "bg-danger";
+            if (type === "warning") bgClass = "bg-warning text-dark";
+
+            toastBox.className = `toast align-items-center text-white ${bgClass} border-0`;
+
+            const toast = new bootstrap.Toast(toastBox, { delay: 4000 });
+            toast.show();
+        }
+        async function initCalendar() {
+            try {
+                const res = await fetch("/available-dates");
+                const data = await res.json();
+                const availableDates = data.dates || [];
+
+                // Start Date
+                flatpickr("#startDate", {
+                    dateFormat: "Y-m-d",
+                    enable: availableDates,
+                });
+
+                // End Date
+                flatpickr("#endDate", {
+                    dateFormat: "Y-m-d",
+                    enable: availableDates,
+                });
+
+            } catch (err) {
+                console.error("Gagal load available dates:", err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initCalendar);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+<!-- navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-3">
+  <div class="container-fluid d-flex align-items-center">
+    <!-- Tombol toggle sidebar untuk mobile -->
+    <div class="d-flex align-items-center">
+      <button class="btn btn-outline-secondary d-lg-none me-2" type="button" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+
+    <!-- Foto & Nama user -->
+    <div class="d-flex align-items-center ms-auto">
+      <img src="{{ user.photo }}" alt="Profile" width="40" height="40" 
+        class="rounded-circle me-2 border border-2 border-white shadow-sm"
+        style="object-fit: cover;" />
+      <strong style="color: #ed1e28; font-weight: 600; font-size: 0.8rem;">
+        {{ user.name }}
+      </strong>
+    </div>
+  </div>
+</nav>

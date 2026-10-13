@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Management User - GAUL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="/static/management_user.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Navbar -->
+        {% include 'navbar.html' %}
+        <!-- Sidebar -->
+        {% include 'sidebar.html' %}
+
+        <!-- Overlay -->
+        <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <div class="container-fluid my-4">
+            <div class="text-end mb-3">
+                {% if session['role'] == 'admin' %}
+                <button class="btn btn-telkom btn-sm" data-bs-toggle="modal" data-bs-target="#userModal"
+                    onclick="openAddModal()">
+                    <i class="bi bi-plus-circle me-1"></i>Insert
+                </button>
+                {% endif %}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-telkom">
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead> <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+  <!-- MODAL -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="userForm">
+                <div class="modal-header modal-header-telkom">
+                    <h5 class="modal-title" id="modalTitle">Add User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="userId" />
+                        <div class="mb-3"> <label for="name" class="form-label">Name</label> <input type="text" class="form-control" id="name" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label> <input type="email" class="form-control" id="email" required />
+                        </div>
+                        <div class="mb-3"> <label for="role" class="form-label">Role</label>
+                            <input type="text" class="form-control" id="role" value="user" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group"><input type="password" class="form-control" id="password" />
+                                <button type="button" class="btn btn-danger" id="togglePassword"><i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let users = [];
+        let editEmailOriginal = null;
+        const modalElement = document.getElementById("userModal");
+        const userModalInstance = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        async function fetchUsers() {
+            const response = await fetch('/get_users');
+            users = await response.json();
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("userTableBody");
+            tbody.innerHTML = "";
+
+            users.forEach((user, index) => {
+                const tr = document.createElement("tr");
+                let aksiButtons = '';
+                if (user.role !== 'admin') {
+                    aksiButtons = `
+            <button class="btn btn-sm btn-edit me-1" onclick="openEditModal('${user.name}', 
+            '${user.email}', '${user.role}')"> Edit
+            </button>
+            <button class="btn btn-sm btn-hapus" onclick="deleteUser('${user.email}')">
+              Delete
+            </button>
+          `;
+                }
+
+                tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.role}</td>
+          <td class="aksi-cell">
+            ${aksiButtons}
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddModal() {
+            editEmailOriginal = null;
+            document.getElementById("modalTitle").textContent = "Add User";
+            document.getElementById("userForm").reset();
+            userModalInstance.show();
+        }
+
+        function openEditModal(name, email, role) {
+            editEmailOriginal = email;
+            document.getElementById("modalTitle").textContent = "Edit User";
+            document.getElementById("name").value = name;
+            document.getElementById("email").value = email;
+            document.getElementById("role").value = role;
+            userModalInstance.show();
+        }
+
+        async function deleteUser(email) {
+            if (confirm("Yakin ingin menghapus user ini?")) {
+                const res = await fetch(`/delete_user/${email}`, { method: 'DELETE' });
+                const data = await res.json();
+                alert(data.message);
+                if (res.ok) fetchUsers();
+            }
+        }
+
+        // Reset saat modal ditutup
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            document.getElementById("userForm").reset();
+            document.getElementById("password").value = "";
+            editEmailOriginal = null;
+        });
+
+        // Submit tambah/edit user
+        document.getElementById("userForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const role = document.getElementById("role").value;
+            const password = document.getElementById("password").value;
+
+            let url = '/add_user';
+            let method = 'POST';
+            let body = { name, email, role, password };
+
+            if (editEmailOriginal) {
+                url = `/edit_user/${editEmailOriginal}`;
+                method = 'PUT';
+                body = { name, role };
+                if (password) {
+                    body.password = password;
+                }
+            }
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+            alert(data.message);
+            if (res.ok) {
+                userModalInstance.hide();
+                fetchUsers();
+            }
+        });
+
+        fetchUsers();
+
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const passwordInput = document.getElementById("password");
+            const icon = document.getElementById("togglePasswordIcon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                passwordInput.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+        });
+    </script>
+</body>
+
+</html>

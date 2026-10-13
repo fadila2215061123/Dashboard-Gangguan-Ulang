@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Management Data - GAUL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="static/management_data.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <!-- Main Content -->
+    <main class="main-content">
+        {% include 'navbar.html' %}
+        <!-- Sidebar -->
+        {% include 'sidebar.html' %}
+        <!-- Overlay -->
+        <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <main class="container-fluid mt-4" id="main-content">
+            <div class="card shadow-sm mt-4">
+
+                <!-- Header -->
+                <div class="card-header bg-white">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                        <!-- Search -->
+                        <div class="input-group input-group-sm" style="max-width: 250px;">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search..."
+                            value="{{ search_query or '' }}" />
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <!-- Dropdown Filter -->
+                            <button class="btn btn-sm btn-outline-secondary" id="viewAllBtn"
+                                onclick="window.location.href='/management_data?view_all=true'">
+                                View All Data
+                            </button>
+
+                            <!-- Import & Export -->
+                            <label class="btn btn-sm btn-outline-danger mb-0">
+                                Import<input type="file" id="excelFile" accept=".xlsx, .xls" hidden />
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="exportBtn">Export</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" id="excelTable">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">NO</th>
+                                    <th rowspan="2">TANGGAL</th>
+                                    <th rowspan="2">NO TIKET</th>
+                                    <th rowspan="2">NO INET</th>
+                                    <th rowspan="2">STO</th>
+                                    <th colspan="2">POTENSI GAUL BY</th>
+                                    <th rowspan="2">CARING</th>
+                                    <th rowspan="2">RE-ASSIGN</th>
+                                </tr>
+                                <tr>
+                                    <th>REDAMAN</th>
+                                    <th>SCC NOT PASSED</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in all_data %}
+                                <tr>
+                                    <td>{{ loop.index0 + start + 1 }}</td>
+                                    <td>{{ row.tanggal }}</td>
+                                    <td data-key="no_tiket">{{ row.no_tiket }}</td>
+                                    <td>{{ row.no_inet }}</td>
+                                    <td>{{ row.sto }}</td>
+                                    <td>{{ row.redaman }}</td>
+                                    <td>{{ row.scc_not_passed }}</td>
+                                    <td>{{ row.caring }}</td>
+                                    <td class="text-center">{{ row.reassign }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination + Showing hanya untuk View All Data -->
+                        {% if not new_data and view_all %}
+                        <div class="pagination-wrapper mt-3 d-flex justify-content-between align-items-center">
+                            <nav>
+                                <ul class="pagination">
+                                    <!-- Tombol Prev -->
+                                    {% if page > 1 %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="{{ url_for('tabel_excel', page=page-1, date=selected_date, view_all=view_all) }}">←</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">←</span></li>
+                                    {% endif %}
+
+                                    <!-- Nomor Halaman -->
+                                    {% for p in range(1, total_pages+1) %}
+                                    {% if p == 1 or p == total_pages or (p >= page-2 and p <= page+2) %} {% if p==page
+                                        %} <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ url_for('tabel_excel', page=p, date=selected_date, view_all=view_all) }}">{{
+                                                p }}</a>
+                                        </li>
+                                        {% endif %}
+                                        {% elif p == 2 or p == total_pages-1 %}
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        <!-- Tombol Next -->
+                                        {% if page < total_pages %} <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ url_for('tabel_excel', page=page+1, date=selected_date, view_all=view_all) }}">→</a>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item disabled"><span class="page-link">→</span></li>
+                                            {% endif %}
+                                </ul>
+                            </nav>
+
+                            <!-- Info jumlah data -->
+                            <span class="text-muted">Showing {{ start+1 }}–{{ end }} of {{ total_items }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-footer text-end">
+                            <button id="saveBtn" class="btn btn-danger d-none">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Overlay -->
+                <div id="loadingOverlay" class="loading-overlay d-none">
+                    <div class="text-center">
+                        <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div>
+                        <p class="mt-3 fw-bold text-dark">Memproses file Excel...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </main>
+
+    <!-- File JS kamu -->
+    <script src="static/management_data.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,227 @@
+:root {
+  --telkom-red: #ed1e28;
+  --telkom-maroon: #b6252a;
+  --gray-dark: #55565b;
+  --gray-light: #959597;
+}
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 240px;
+  z-index: 100;
+  background-color: #fff; 
+  color: #333; 
+  border-right: 1px solid #ddd; 
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.sidebar .logo {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--telkom-red) !important; 
+  padding: 0.5rem 1rem 1rem;
+  text-align: center;
+}
+
+.sidebar-logo {
+  max-width: 80px;
+  height: auto;
+  margin-bottom: 0.2rem;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #333; 
+  padding: 0.6rem 1rem;
+  border-radius: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 13px;
+}
+
+.sidebar .nav-link i {
+  font-size: 1rem;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: var(--telkom-red); 
+  color: white; 
+}
+
+.sidebar .sidebar-separator {
+  border-top: 2px solid var(--telkom-red) !important; 
+  margin: 0.5rem 1rem;
+}
+
+/* Logout Link */
+.logout-link {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 0.6rem 1rem;
+  background-color: transparent; 
+  color: #000 !important; 
+  text-decoration: none;
+  border-radius: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.logout-link i {
+  font-size: 1rem;
+  margin-right: 8px; 
+  color: #000; 
+}
+
+.logout-link:hover {
+  background-color: var(--telkom-red); 
+  color: #fff !important; 
+}
+
+.logout-link:hover i {
+  color: #fff !important; 
+}
+
+/* === MAIN CONTENT === */
+.main-content {
+  margin-left: 240px;
+  padding: 0;
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* === PROFILE === */
+.profile-header {
+  background: linear-gradient(to right, #ed1e28, #b6252a);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-info label {
+  font-weight: 500;
+  color: #55565b;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.15);
+}
+
+.form-control:focus {
+  border-color: #959597;
+  box-shadow: none;
+}
+
+.btn-icon-back {
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-back:hover {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+/* Nav pills styling */
+.nav-pills .nav-link {
+  color: rgb(5, 5, 5);
+}
+
+.nav-pills .nav-link.active {
+  color: #f9f9f9;
+  background-color: var(--telkom-red);
+  font-weight: bold;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
+  /* Sidebar */
+  .sidebar {
+    left: -250px;
+    width: 220px;
+  }
+
+  .sidebar.show {
+    left: 0;
+    z-index: 1050;
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1040;
+  }
+
+  .overlay.show {
+    display: block;
+  }
+
+  /* Main Content */
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+    width: 100%;
+  }
+
+  /* Profile photo kecil di HP */
+  .profile-photo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .profile-header {
+    padding: 1.5rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .profile-header h4 {
+    font-size: 1.1rem;
+  }
+
+  .profile-header small {
+    font-size: 0.85rem;
+  }
+}

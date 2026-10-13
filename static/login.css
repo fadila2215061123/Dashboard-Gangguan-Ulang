@@ -1,0 +1,161 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card Login */
+.card-login {
+  width: 800px;       
+  height: 500px;      
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  border: none;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 6px 25px 3px rgba(237, 30, 40, 0.8);
+}
+
+.card-login:hover {
+  box-shadow: 0 10px 30px 6px rgba(237, 30, 40, 1);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Bagian kiri (form login) */
+.login-left {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding: 50px 40px;   
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.card-login h4 {
+  font-weight: 800;
+  color: #ed1e28;
+  font-size: 2rem;   
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+/* Input */
+.input-group {
+  margin-bottom: 18px;
+}
+
+.input-group .form-control {
+  height: 48px;         
+  padding: 8px 12px;
+  font-size: 1rem;     
+  border: 1px solid #ed1e28;
+}
+
+.input-group-text {
+  background-color: #ed1e28;
+  color: rgb(255, 255, 255);
+  font-size: 1.1rem;
+  border: 1px solid #ed1e28;
+  height: 48px;      
+}
+
+.input-group .form-control:focus,
+.input-group-text:focus {
+  outline: none;
+  box-shadow: 0 0 6px rgba(237, 30, 40, 0.6);
+  border-color: #ed1e28;
+}
+
+/* Tombol */
+.btn-danger {
+  width: 40%;
+  height: 42px;
+  font-size: 18px;
+  font-weight: 600;
+  background-color: #ed1e28;
+  border: none;
+  border-radius: 6px;
+  margin: 25px auto 0;
+  display: block;
+}
+
+.btn-danger:hover {
+  background-color: #c51a23;
+}
+
+/* Bagian kanan (logo) */
+.login-right {
+  flex: 0 0 50%;
+  max-width: 50%;
+  background: url('/static/images/background_telkom.jpg') no-repeat center center;
+  background-size: cover;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.login-right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(234, 225, 225, 0.3);
+}
+
+.logo-img {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 120px;     
+  height: auto;
+  z-index: 2;
+}
+  .error-message {
+  color: red;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+/* Saat layar diperkecil */
+@media (max-width: 768px) {
+  .card-login {
+    width: 95%;
+    height: auto;       
+    min-height: 500px;  
+  }
+
+  .login-left,
+  .login-right {
+    padding: 15px;
+  }
+
+  .logo-img {
+    width: 70px;
+  }
+}
+/* Hilangkan ikon eye bawaan di Microsoft Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+    width: 0;
+    height: 0;
+}
+
+/* Hilangkan tombol bawaan di browser berbasis WebKit (Chrome, Edge Chromium) */
+input[type="password"]::-webkit-textfield-decoration-container {
+    display: none !important;
+}
+
+/* Untuk Safari dan lainnya (jaga-jaga) */
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+}
